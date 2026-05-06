@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Simulasi PKL · XI TKJ 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pink:    #FFD93D;
+  --pink2:   #FF6B35;
+  --blue:    #74C7EC;
+  --blue2:   #1A9FD8;
+  --yellow:  #FFF0A0;
+  --yellow2: #FFD93D;
+  --green:   #A8E063;
+  --green2:  #3DAA5C;
+  --purple:  #B8E0FF;
+  --purple2: #1A9FD8;
+  --peach:   #FFE0A0;
+  --mint:    #A8E063;
+  --bg:      #EAF6FF;
+  --card:    #FFFFFF;
+  --text:    #1A2E44;
+  --muted:   #4A7A9B;
+  --radius:  20px;
+  --shadow:  0 8px 32px rgba(26,159,216,0.18);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===================== SCREENS ===================== */
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ===================== LOADING ===================== */
+#screen-loading {
+  background: linear-gradient(160deg, #1A9FD8 0%, #74C7EC 50%, #A8E063 100%);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0;
+}
+
+.loading-logo {
+  width: 120px;
+  height: 120px;
+  border-radius: 32px;
+  background: white;
+  box-shadow: 0 12px 40px rgba(255,180,180,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  margin-bottom: 24px;
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.loading-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 6px;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.loading-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 36px;
+  text-align: center;
+}
+
+.loading-bar-wrap {
+  width: 200px;
+  height: 8px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.loading-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #FFD93D, #FF6B35);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+.loading-text {
+  font-size: 12px;
+  color: rgba(255,255,255,0.8);
+  min-height: 18px;
+}
+
+/* ===================== TITLE PAGE ===================== */
+#screen-title {
+  background: #5BC8E8;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+#screen-title .title-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#screen-title .title-hero,
+#screen-title .menu-card {
+  position: relative;
+  z-index: 1;
+}
+
+.title-hero {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: 48px;
+  display: none;
+}
+
+.title-badge {
+  display: inline-block;
+  background: white;
+  border-radius: 99px;
+  padding: 6px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--pink2);
+  box-shadow: 0 4px 16px rgba(255,130,160,0.2);
+  margin-bottom: 20px;
+  letter-spacing: 0.05em;
+}
+
+.title-illustration {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: white;
+  margin: 0 auto 20px;
+  box-shadow: 0 16px 48px rgba(255,180,180,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  animation: float 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.title-illustration img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.confetti-top {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.confetti-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  animation: confetti-fall 2s ease-in-out infinite;
+}
+.confetti-dot:nth-child(1){background:#FF6B35;animation-delay:0s;}
+.confetti-dot:nth-child(2){background:#FFD93D;animation-delay:0.2s;border-radius:2px;}
+.confetti-dot:nth-child(3){background:#1A9FD8;animation-delay:0.4s;}
+.confetti-dot:nth-child(4){background:#3DAA5C;animation-delay:0.6s;border-radius:2px;}
+.confetti-dot:nth-child(5){background:#FF6B35;animation-delay:0.8s;}
+
+@keyframes confetti-fall {
+  0%,100%{transform:translateY(0) rotate(0);}
+  50%{transform:translateY(-8px) rotate(180deg);}
+}
+
+.app-name {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #FF6B35, #1A9FD8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.app-sub {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.menu-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 16px 24px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 28px 28px 0 0;
+  border-top: 1.5px solid rgba(255,255,255,0.25);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 480px;
+  z-index: 2;
+}
+
+.btn-mulai {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #FFD93D 0%, #FF6B35 100%);
+  color: #1A2E44;
+  font-family: 'Nunito', sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #c94f1a, 0 8px 24px rgba(255,107,53,0.45);
+  transition: transform 0.1s, box-shadow 0.1s;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.btn-mulai:active { transform: translateY(3px); box-shadow: 0 3px 0 #c94f1a, 0 4px 12px rgba(255,107,53,0.3); }
+
+.btn-secondary {
+  width: 100%;
+  padding: 13px;
+  border: 2.5px solid rgba(26,159,216,0.7);
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.55);
+  color: #1A9FD8;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 0 rgba(18,120,168,0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.btn-secondary:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(18,120,168,0.4); background: rgba(255,255,255,0.75); }
+
+.btn-ghost {
+  width: 100%;
+  padding: 13px;
+  border: 2.5px solid rgba(61,170,92,0.7);
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.55);
+  color: #3DAA5C;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 0 rgba(42,122,64,0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.btn-ghost:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(42,122,64,0.4); background: rgba(255,255,255,0.75); }
+
+/* ===================== PANDUAN ===================== */
+#screen-panduan {
+  background: linear-gradient(160deg, #EAF6FF 0%, #D4F0FF 100%);
+  overflow-y: auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  padding: 52px 20px 20px;
+  gap: 12px;
+}
+
+.back-btn {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+.back-btn:active { transform: scale(0.93); }
+
+.page-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.panduan-content {
+  padding: 0 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panduan-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.panduan-icon {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.panduan-card h3 { font-size: 14px; font-weight: 800; margin-bottom: 4px; color: var(--text); }
+.panduan-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ===================== ABOUT ===================== */
+#screen-about {
+  background: linear-gradient(160deg, #FFF5CC 0%, #EAF6FF 100%);
+  overflow-y: auto;
+}
+
+.about-content {
+  padding: 0 20px 40px;
+}
+
+.about-hero {
+  text-align: center;
+  padding: 20px 0 28px;
+}
+
+.about-avatar {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink), var(--blue));
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+}
+
+.about-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+}
+
+.about-card h3 { font-size: 13px; font-weight: 800; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+.about-card p { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+/* ===================== FORM ===================== */
+#screen-form {
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+.form-progress-wrap {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 12px 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  z-index: 10;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: #F0EDE8;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FFD93D, #FF6B35);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.form-body { padding: 20px 20px 100px; }
+
+.form-section {
+  background: white;
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(255,180,150,0.1);
+}
+
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--yellow);
+  color: #8B6914;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 99px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.q-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--pink);
+  color: #C0305A;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.form-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  padding-left: 28px;
+  line-height: 1.6;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #F0ECE8;
+  border-radius: 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: #FDFBF8;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.form-input:focus { border-color: var(--pink2); background: white; }
+
+textarea.form-input { min-height: 90px; resize: vertical; }
+
+.char-count {
+  text-align: right;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.divider-soft {
+  border: none;
+  border-top: 1.5px dashed #F0ECE8;
+  margin: 18px 0;
+}
+
+.radio-options { display: flex; flex-direction: column; gap: 10px; padding-left: 28px; }
+
+.radio-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 2px solid #F0ECE8;
+  background: #FDFBF8;
+  transition: border-color 0.2s, background 0.2s;
+}
+.radio-opt:active { transform: scale(0.98); }
+.radio-opt.selected { border-color: var(--pink2); background: #FFF0F4; }
+
+.radio-opt input[type=radio] { display: none; }
+
+.radio-bullet {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid #D8D0C8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: border-color 0.2s;
+}
+.radio-opt.selected .radio-bullet {
+  border-color: var(--pink2);
+  background: var(--pink2);
+}
+.radio-bullet::after {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: white;
+  display: none;
+}
+.radio-opt.selected .radio-bullet::after { display: block; }
+
+.radio-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+.form-footer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 16px 20px;
+  background: white;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  z-index: 10;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #FFD93D 0%, #FF6B35 100%);
+  color: #1A2E44;
+  font-family: 'Nunito', sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #c94f1a, 0 8px 24px rgba(255,107,53,0.4);
+  transition: transform 0.1s, box-shadow 0.1s;
+  letter-spacing: 0.02em;
+}
+.btn-submit:active { transform: translateY(3px); box-shadow: 0 3px 0 #c94f1a; }
+
+/* ===================== AI THINKING ===================== */
+#screen-thinking {
+  background: linear-gradient(160deg, #FFE8F0 0%, #E8F4FF 50%, #E8FFF4 100%);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 40px 20px;
+}
+
+.thinking-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  animation: think-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes think-pulse {
+  0%,100% { transform: scale(1) rotate(-3deg); }
+  50% { transform: scale(1.08) rotate(3deg); }
+}
+
+.thinking-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.thinking-sub {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.thinking-dots {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.thinking-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  animation: dot-bounce 1.2s ease-in-out infinite;
+}
+.thinking-dot:nth-child(1){background:var(--pink2);animation-delay:0s;}
+.thinking-dot:nth-child(2){background:var(--yellow2);animation-delay:0.2s;}
+.thinking-dot:nth-child(3){background:var(--blue2);animation-delay:0.4s;}
+
+@keyframes dot-bounce {
+  0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}
+}
+
+.thinking-steps {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.thinking-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+.thinking-step.visible { opacity: 1; transform: translateY(0); }
+
+.step-check {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.step-check.pending { background: #F0ECE8; animation: spin 1s linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.step-label { font-size: 13px; font-weight: 600; color: var(--text); }
+
+/* ===================== RESULT ===================== */
+#screen-result {
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+.result-header {
+  padding: 0 20px 0;
+  text-align: center;
+}
+
+.result-verdict {
+  padding: 48px 20px 28px;
+  text-align: center;
+}
+
+.verdict-icon-wrap {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  animation: float 2.5s ease-in-out infinite;
+}
+
+.verdict-icon-wrap.siap {
+  background: linear-gradient(135deg, #A8E063, #3DAA5C);
+  box-shadow: 0 16px 40px rgba(61,170,92,0.4);
+}
+
+.verdict-icon-wrap.belum {
+  background: linear-gradient(135deg, #FFD93D, #FF6B35);
+  box-shadow: 0 16px 40px rgba(255,107,53,0.4);
+}
+
+.verdict-label {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+.verdict-label.siap { color: #3DAA5C; }
+.verdict-label.belum { color: #FF6B35; }
+
+.verdict-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.verdict-msg {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 300px;
+  margin: 0 auto 24px;
+}
+
+.score-pills {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.score-pill {
+  padding: 8px 18px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.result-body {
+  padding: 0 20px 100px;
+}
+
+.result-section-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 12px;
+  margin-top: 24px;
+}
+
+.feedback-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 16px rgba(255,180,150,0.1);
+  border-left: 4px solid transparent;
+}
+.feedback-card.correct { border-left-color: var(--green2); }
+.feedback-card.wrong { border-left-color: var(--pink2); }
+.feedback-card.partial { border-left-color: var(--yellow2); }
+
+.fb-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.fb-icon { font-size: 16px; }
+.fb-label { font-size: 12px; font-weight: 800; color: var(--text); flex: 1; }
+.fb-score { font-size: 12px; font-weight: 700; color: var(--muted); }
+.fb-detail { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+.ai-insight-card {
+  background: linear-gradient(135deg, #F0E8FF, #E8F4FF);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 10px;
+}
+
+.ai-insight-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ai-insight-header span:first-child { font-size: 20px; }
+.ai-insight-header strong { font-size: 14px; font-weight: 800; color: var(--purple2); }
+
+.ai-insight-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.tips-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 16px rgba(255,180,150,0.1);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.tip-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: #8B6914;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tip-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+
+.result-actions {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 14px 20px;
+  background: white;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  display: flex;
+  gap: 10px;
+}
+
+.btn-act {
+  flex: 1;
+  padding: 13px;
+  border-radius: var(--radius);
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-act:active { transform: scale(0.96); }
+.btn-act.primary { background: linear-gradient(135deg, #FFD93D, #FF6B35); color: #1A2E44; font-weight: 900; box-shadow: 0 4px 0 #c94f1a; }
+.btn-act.outline { background: white; color: var(--text); border: 2px solid #D4EDFF; }
+
+/* ===================== MODAL ===================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(74,55,40,0.4);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal-sheet {
+  background: white;
+  border-radius: 28px 28px 0 0;
+  padding: 28px 24px 48px;
+  width: 100%;
+  max-width: 480px;
+  transform: translateY(60px);
+  transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+.modal-handle { width: 40px; height: 4px; background: #E8E0D8; border-radius: 99px; margin: 0 auto 20px; }
+.modal-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 12px; }
+.modal-body { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 20px; }
+.modal-close { width: 100%; padding: 14px; background: var(--pink); color: #C0305A; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; }
+
+/* ===================== TOAST ===================== */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #4A3728;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 200;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@keyframes pulse-btn {
+  0%,100% { transform: scale(1); box-shadow: 0 6px 0 #c94f1a, 0 8px 24px rgba(255,107,53,0.5); }
+  50% { transform: scale(1.06); box-shadow: 0 6px 0 #c94f1a, 0 14px 36px rgba(255,107,53,0.7); }
+}
+
+@media print {
+  .form-footer, .result-actions, .form-progress-wrap { display: none !important; }
+  #screen-result { padding-bottom: 0 !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOADING ===== -->
+<div class="screen active" id="screen-loading">
+  <div class="loading-logo" style="padding:0;overflow:hidden"><img src="images/titlescreen.png" alt="Loading" style="width:100%;height:100%;object-fit:cover;border-radius:32px" onerror="this.parentElement.innerHTML='🎓'"></div>
+  <div class="loading-title">Simulasi PKL</div>
+  <div class="loading-sub">XI TKJ 2 · Etika & Komunikasi Profesional</div>
+
+  <!-- Tombol tap to start -->
+  <div id="tapStartWrap" style="margin-bottom:20px">
+    <button id="btnTapStart" onclick="startWithMusic()" style="
+      padding: 14px 36px;
+      background: linear-gradient(135deg, #FFD93D, #FF6B35);
+      border: none;
+      border-radius: 99px;
+      color: #1A2E44;
+      font-family: 'Nunito', sans-serif;
+      font-size: 17px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #c94f1a, 0 8px 24px rgba(255,107,53,0.5);
+      animation: pulse-btn 1.4s ease-in-out infinite;
+      letter-spacing: 0.03em;
+    ">🎵 Mulai Aplikasi</button>
+  </div>
+
+  <!-- Loading bar (tersembunyi dulu) -->
+  <div id="loadingBarSection" style="display:none;text-align:center">
+    <div class="loading-bar-wrap">
+      <div class="loading-bar" id="loadBar"></div>
+    </div>
+    <div class="loading-text" id="loadText">Mempersiapkan simulasi...</div>
+  </div>
+</div>
+
+<!-- Audio BGM -->
+<audio id="bgm" src="audio/bgm.mp3" loop preload="auto"></audio>
+
+<!-- ===== TITLE ===== -->
+<div class="screen" id="screen-title">
+  <img class="title-bg" src="images/titlescreen.png" alt="" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(160deg,#FFE8F0,#E8F4FF 60%,#E8FFF4)'">
+  <div class="title-hero">
+    <div class="title-badge">✨ XI TKJ 2 · Siap PKL!</div>
+    <div class="confetti-top">
+      <div class="confetti-dot"></div><div class="confetti-dot"></div>
+      <div class="confetti-dot"></div><div class="confetti-dot"></div>
+      <div class="confetti-dot"></div>
+    </div>
+    <div class="app-name">Simulasi Etika &<br>Komunikasi Profesional</div>
+    <div class="app-sub">Uji kesiapanmu sebelum PKL!<br>Sistem AI akan menilai jawabanmu secara cerdas.</div>
+  </div>
+  <div class="menu-card">
+    <button class="btn-mulai" onclick="goTo('screen-form');initForm()">
+      🚀 Mulai Simulasi
+    </button>
+    <button class="btn-secondary" onclick="goTo('screen-panduan')">
+      📖 Panduan Mengisi
+    </button>
+    <button class="btn-ghost" onclick="goTo('screen-about')">
+      💜 Tentang Aplikasi
+    </button>
+  </div>
+</div>
+
+<!-- ===== PANDUAN ===== -->
+<div class="screen" id="screen-panduan">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('screen-title')">←</button>
+    <div class="page-title">📖 Panduan Mengisi</div>
+  </div>
+  <div class="panduan-content">
+    <div class="panduan-card">
+      <div class="panduan-icon" style="background:#FFE8F0">📝</div>
+      <div>
+        <h3>Isi semua kolom dengan jujur</h3>
+        <p>Jawab berdasarkan kemampuan kamu sendiri. Tidak perlu mencontek — ini untuk tahu seberapa siap kamu, bukan ujian nilai!</p>
+      </div>
+    </div>
+    <div class="panduan-card">
+      <div class="panduan-icon" style="background:#E8F4FF">🤖</div>
+      <div>
+        <h3>Sistem AI akan mengoreksi otomatis</h3>
+        <p>Jawabanmu akan dievaluasi oleh AI cerdas yang memahami konteks, bukan sekadar cek kata kunci. AI akan memberi feedback spesifik untuk setiap jawaban.</p>
+      </div>
+    </div>
+    <div class="panduan-card">
+      <div class="panduan-icon" style="background:#E8FFF4">📊</div>
+      <div>
+        <h3>Ada 4 bagian soal</h3>
+        <p>Identitas → Perkenalan diri → Komunikasi dengan pembimbing → Refleksi diri. Total sekitar 10–15 menit.</p>
+      </div>
+    </div>
+    <div class="panduan-card">
+      <div class="panduan-icon" style="background:#F0E8FF">🏆</div>
+      <div>
+        <h3>Hasil: Siap PKL atau Belum Siap</h3>
+        <p>AI akan memberikan verdict berdasarkan kualitas jawaban essay-mu dan ketepatan pilihan ganda. Disertai tips personal untuk kamu!</p>
+      </div>
+    </div>
+    <div class="panduan-card">
+      <div class="panduan-icon" style="background:#FFF4E8">💾</div>
+      <div>
+        <h3>Bisa cetak & kirim ke guru</h3>
+        <p>Setelah selesai, hasilmu bisa di-screenshot, dicetak, atau disimpan sebagai PDF untuk dikumpulkan ke Pak/Bu guru.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ABOUT ===== -->
+<div class="screen" id="screen-about">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('screen-title')">←</button>
+    <div class="page-title">💜 Tentang Aplikasi</div>
+  </div>
+  <div class="about-content">
+    <div class="about-hero">
+      <div class="about-avatar">🎓</div>
+      <div style="font-size:20px;font-weight:900;color:var(--text);margin-bottom:4px">Simulasi PKL</div>
+      <div style="font-size:13px;color:var(--muted)">Versi 2.0 · XI TKJ 2</div>
+    </div>
+    <div class="about-card">
+      <h3>Tujuan Aplikasi</h3>
+      <p>Membantu siswa SMK Negeri 1 Brondong XI TKJ 2 mempersiapkan diri secara mental dan komunikasi sebelum memasuki dunia kerja melalui Praktik Kerja Lapangan (PKL).</p>
+    </div>
+    <div class="about-card">
+      <h3>Fitur Unggulan</h3>
+      <p>✅ Evaluasi berbasis AI<br>✅ Sistem pakar: Siap PKL / Belum Siap<br>✅ Feedback personal per jawaban<br>✅ Tips improvement spesifik<br>✅ Bisa cetak & simpan hasil</p>
+    </div>
+    <div class="about-card">
+      <h3>Dibuat untuk</h3>
+      <p>Tugas Pembelajaran · Wali Kelas XI TKJ 2 · Nailul Authar, S.Kom · SMK Negeri 1 Brondong · Jawa Timur</p>
+    </div>
+    <div class="about-card">
+      <h3>Catatan Privasi</h3>
+      <p>Jawaban kamu dikirim ke AI hanya untuk dikoreksi dan tidak disimpan secara permanen. Gunakan dengan aman!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FORM ===== -->
+<div class="screen" id="screen-form">
+  <div class="form-progress-wrap">
+    <div class="progress-label">
+      <span id="progressLabel">Identitas diri</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="form-body">
+
+    <!-- IDENTITAS -->
+    <div class="form-section">
+      <div class="section-tag">👤 Identitas</div>
+      <div class="form-label"><span class="q-badge">1</span>Nama lengkap kamu</div>
+      <input class="form-input" id="f_nama" type="text" placeholder="Tulis nama lengkap..." oninput="updateProgress()">
+      <div style="height:14px"></div>
+      <div class="form-label"><span class="q-badge">2</span>Tempat PKL yang kamu tuju</div>
+      <input class="form-input" id="f_tempat" type="text" placeholder="Contoh: CV Maju Jaya Informatika, Malang" oninput="updateProgress()">
+    </div>
+
+    <!-- PERKENALAN -->
+    <div class="form-section">
+      <div class="section-tag">💬 Perkenalan Diri</div>
+      <div class="form-label"><span class="q-badge">3</span>Tulis draf perkenalan diri yang sopan untuk hari pertama PKL</div>
+      <div class="form-hint">Sertakan: nama, asal sekolah, jurusan, dan tujuan PKL. Gunakan bahasa formal dan sopan.</div>
+      <textarea class="form-input" id="f_perkenalan" placeholder="Tuliskan perkenalan dirimu di sini..." oninput="cc(this,'cc1');updateProgress()"></textarea>
+      <div class="char-count" id="cc1">0 karakter</div>
+    </div>
+
+    <!-- MENYAPA -->
+    <div class="form-section">
+      <div class="section-tag">🤝 Menyapa Pembimbing</div>
+      <div class="form-label"><span class="q-badge">4</span>Bagaimana cara kamu menyapa pembimbing industri saat pertama kali bertemu?</div>
+      <div class="form-hint">Jelaskan: salam pembuka, cara menyebut nama/jabatan, dan sikap yang kamu tunjukkan.</div>
+      <textarea class="form-input" id="f_sapa" placeholder="Ceritakan caramu menyapa pembimbing..." oninput="cc(this,'cc2');updateProgress()"></textarea>
+      <div class="char-count" id="cc2">0 karakter</div>
+
+      <div class="divider-soft"></div>
+
+      <div class="form-label"><span class="q-badge">5</span>Pilih kalimat yang paling tepat untuk menyapa pembimbing pagi hari</div>
+      <div class="radio-options" id="rg1">
+        <label class="radio-opt" onclick="selectRadio('rg1',this,'a')"><input type="radio" name="rg1" value="a"><div class="radio-bullet"></div><span class="radio-text">"Eh, Pak. Selamat pagi ya."</span></label>
+        <label class="radio-opt" onclick="selectRadio('rg1',this,'b')"><input type="radio" name="rg1" value="b"><div class="radio-bullet"></div><span class="radio-text">"Selamat pagi, Pak Budi. Apakah Bapak sudah tiba? Ada yang bisa saya bantu?"</span></label>
+        <label class="radio-opt" onclick="selectRadio('rg1',this,'c')"><input type="radio" name="rg1" value="c"><div class="radio-bullet"></div><span class="radio-text">"Good morning, Boss!"</span></label>
+        <label class="radio-opt" onclick="selectRadio('rg1',this,'d')"><input type="radio" name="rg1" value="d"><div class="radio-bullet"></div><span class="radio-text">"Pagi, Pak. Langsung mulai kerja ya."</span></label>
+      </div>
+    </div>
+
+    <!-- BERTANYA -->
+    <div class="form-section">
+      <div class="section-tag">❓ Bertanya dengan Sopan</div>
+      <div class="form-label"><span class="q-badge">6</span>Kamu diberi tugas memasang kabel jaringan tapi tidak mengerti. Apa yang kamu ucapkan kepada pembimbing?</div>
+      <div class="form-hint">Tulis kalimat lengkap yang akan kamu ucapkan. Hindari kesan malas atau tidak sopan.</div>
+      <textarea class="form-input" id="f_tanya" placeholder="Tulis kalimat bertanya yang sopan..." oninput="cc(this,'cc3');updateProgress()"></textarea>
+      <div class="char-count" id="cc3">0 karakter</div>
+
+      <div class="divider-soft"></div>
+
+      <div class="form-label"><span class="q-badge">7</span>Mana cara bertanya yang paling profesional?</div>
+      <div class="radio-options" id="rg2">
+        <label class="radio-opt" onclick="selectRadio('rg2',this,'a')"><input type="radio" name="rg2" value="a"><div class="radio-bullet"></div><span class="radio-text">"Pak, saya nggak ngerti nih."</span></label>
+        <label class="radio-opt" onclick="selectRadio('rg2',this,'b')"><input type="radio" name="rg2" value="b"><div class="radio-bullet"></div><span class="radio-text">"Permisi Pak, boleh saya bertanya? Saya kurang memahami langkah pemasangan di titik ini. Apakah Bapak berkenan menjelaskan?"</span></label>
+        <label class="radio-opt" onclick="selectRadio('rg2',this,'c')"><input type="radio" name="rg2" value="c"><div class="radio-bullet"></div><span class="radio-text">"Ini gimana caranya sih, Pak?"</span></label>
+        <label class="radio-opt" onclick="selectRadio('rg2',this,'d')"><input type="radio" name="rg2" value="d"><div class="radio-bullet"></div><span class="radio-text">Diam saja, tidak berani bertanya.</span></label>
+      </div>
+    </div>
+
+    <!-- IZIN -->
+    <div class="form-section">
+      <div class="section-tag">🚪 Meminta Izin</div>
+      <div class="form-label"><span class="q-badge">8</span>Di tengah jam kerja ada keperluan mendesak. Bagaimana cara kamu meminta izin?</div>
+      <div class="form-hint">Tulis kalimat izin yang sopan. Jelaskan alasan singkat dan tunjukkan rasa tanggung jawab terhadap pekerjaanmu.</div>
+      <textarea class="form-input" id="f_izin" placeholder="Tulis kalimat meminta izin..." oninput="cc(this,'cc4');updateProgress()"></textarea>
+      <div class="char-count" id="cc4">0 karakter</div>
+
+      <div class="divider-soft"></div>
+
+      <div class="form-label"><span class="q-badge">9</span>Kalimat meminta izin yang paling tepat?</div>
+      <div class="radio-options" id="rg3">
+        <label class="radio-opt" onclick="selectRadio('rg3',this,'a')"><input type="radio" name="rg3" value="a"><div class="radio-bullet"></div><span class="radio-text">"Pak, saya pulang dulu ya, ada urusan."</span></label>
+        <label class="radio-opt" onclick="selectRadio('rg3',this,'b')"><input type="radio" name="rg3" value="b"><div class="radio-bullet"></div><span class="radio-text">"Permisi Pak, mohon maaf mengganggu. Bolehkah saya meminta izin sebentar? Ada keperluan keluarga mendesak. Tugas saya selesaikan segera setelah kembali."</span></label>
+        <label class="radio-opt" onclick="selectRadio('rg3',this,'c')"><input type="radio" name="rg3" value="c"><div class="radio-bullet"></div><span class="radio-text">"Izin Pak, kabur dulu ya hehe."</span></label>
+        <label class="radio-opt" onclick="selectRadio('rg3',this,'d')"><input type="radio" name="rg3" value="d"><div class="radio-bullet"></div><span class="radio-text">Langsung pergi tanpa bilang siapa pun.</span></label>
+      </div>
+    </div>
+
+    <!-- REFLEKSI -->
+    <div class="form-section">
+      <div class="section-tag">⭐ Refleksi Diri</div>
+      <div class="form-label"><span class="q-badge">10</span>Mengapa etika komunikasi penting saat PKL? Apa yang akan kamu persiapkan?</div>
+      <div class="form-hint">Jawab dengan jujur dan dari hatimu. Minimal 3 kalimat yang bermakna ya!</div>
+      <textarea class="form-input" id="f_refleksi" style="min-height:110px" placeholder="Tulis refleksimu di sini..." oninput="cc(this,'cc5');updateProgress()"></textarea>
+      <div class="char-count" id="cc5">0 karakter</div>
+    </div>
+
+  </div>
+
+  <div class="form-footer">
+    <button class="btn-submit" onclick="submitForm()">🤖 Koreksi dengan AI &rarr;</button>
+  </div>
+</div>
+
+<!-- ===== THINKING ===== -->
+<div class="screen" id="screen-thinking">
+  <div class="thinking-icon">🤖</div>
+  <div class="thinking-title">AI sedang mengoreksi...</div>
+  <div class="thinking-sub">Sistem pakar sedang menganalisis<br>setiap jawabanmu secara mendalam</div>
+  <div class="thinking-dots">
+    <div class="thinking-dot"></div>
+    <div class="thinking-dot"></div>
+    <div class="thinking-dot"></div>
+  </div>
+  <div class="thinking-steps">
+    <div class="thinking-step" id="step1">
+      <div class="step-check pending" id="step1icon">⟳</div>
+      <div class="step-label">Membaca jawaban essay...</div>
+    </div>
+    <div class="thinking-step" id="step2">
+      <div class="step-check pending" id="step2icon">⟳</div>
+      <div class="step-label">Mengevaluasi pilihan ganda...</div>
+    </div>
+    <div class="thinking-step" id="step3">
+      <div class="step-check pending" id="step3icon">⟳</div>
+      <div class="step-label">Menganalisis pola komunikasi...</div>
+    </div>
+    <div class="thinking-step" id="step4">
+      <div class="step-check pending" id="step4icon">⟳</div>
+      <div class="step-label">Menyusun feedback personal...</div>
+    </div>
+    <div class="thinking-step" id="step5">
+      <div class="step-check pending" id="step5icon">⟳</div>
+      <div class="step-label">Menentukan verdict PKL...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RESULT ===== -->
+<div class="screen" id="screen-result">
+  <div class="result-verdict">
+    <div class="verdict-icon-wrap" id="verdictIcon"></div>
+    <div class="verdict-label" id="verdictLabel"></div>
+    <div class="verdict-title" id="verdictTitle"></div>
+    <div class="verdict-msg" id="verdictMsg"></div>
+    <div class="score-pills" id="scorePills"></div>
+  </div>
+
+  <div class="result-body">
+    <div class="result-section-title">🤖 Analisis AI per Soal</div>
+    <div id="feedbackCards"></div>
+
+    <div class="result-section-title">💡 Insight dari AI</div>
+    <div class="ai-insight-card" id="aiInsight">
+      <div class="ai-insight-header">
+        <span>🧠</span><strong>Analisis Pola Komunikasi</strong>
+      </div>
+      <div class="ai-insight-text" id="aiInsightText">Memuat...</div>
+    </div>
+
+    <div class="result-section-title">🎯 Tips untuk Kamu</div>
+    <div id="tipCards"></div>
+  </div>
+
+  <div class="result-actions">
+    <button class="btn-act outline" onclick="window.print()">🖨️ Cetak</button>
+    <button class="btn-act outline" onclick="showScreenshotGuide()">📸 Screenshot</button>
+    <button class="btn-act primary" onclick="resetAll()">🔄 Coba Lagi</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-body" id="modalBody"></div>
+    <button class="modal-close" onclick="closeModal()">Tutup</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== NAVIGATION =====
+function goTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ===== BGM & SPLASH START =====
+function startWithMusic() {
+  const bgm = document.getElementById('bgm');
+  bgm.volume = 0.5;
+  bgm.play().catch(() => {}); // autoplay policy fallback
+
+  // Sembunyikan tombol, tampilkan loading bar
+  document.getElementById('tapStartWrap').style.display = 'none';
+  document.getElementById('loadingBarSection').style.display = 'block';
+
+  // Jalankan loading bar
+  animateLoading();
+}
+
+// ===== LOADING =====
+const loadMsgs = [
+  'Mempersiapkan simulasi...',
+  'Memuat sistem pakar AI...',
+  'Mengatur soal-soal...',
+  'Hampir siap!'
+];
+let loadStep = 0;
+const loadBar = document.getElementById('loadBar');
+const loadText = document.getElementById('loadText');
+
+function animateLoading() {
+  if (loadStep >= 4) {
+    setTimeout(() => goTo('screen-title'), 300);
+    return;
+  }
+  loadBar.style.width = ((loadStep + 1) * 25) + '%';
+  loadText.textContent = loadMsgs[loadStep];
+  loadStep++;
+  setTimeout(animateLoading, 600);
+}
+
+// ===== FORM HELPERS =====
+const radioState = { rg1: null, rg2: null, rg3: null };
+
+function selectRadio(groupId, el, val) {
+  document.querySelectorAll(`#${groupId} .radio-opt`).forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  radioState[groupId] = val;
+  updateProgress();
+}
+
+function cc(el, id) {
+  document.getElementById(id).textContent = el.value.length + ' karakter';
+  updateProgress();
+}
+
+function initForm() {
+  updateProgress();
+}
+
+function updateProgress() {
+  const fields = ['f_nama', 'f_tempat', 'f_perkenalan', 'f_sapa', 'f_tanya', 'f_izin', 'f_refleksi'];
+  let filled = fields.filter(id => document.getElementById(id)?.value.trim().length > 10).length;
+  filled += Object.values(radioState).filter(v => v !== null).length;
+  const total = fields.length + 3;
+  const pct = Math.round((filled / total) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  const labels = ['Identitas diri', 'Perkenalan diri', 'Menyapa pembimbing', 'Bertanya tugas', 'Meminta izin', 'Refleksi diri'];
+  const idx = Math.min(Math.floor(filled / 1.5), labels.length - 1);
+  document.getElementById('progressLabel').textContent = labels[idx] || 'Hampir selesai!';
+}
+
+// ===== SUBMIT =====
+function submitForm() {
+  const nama = document.getElementById('f_nama').value.trim();
+  const tempat = document.getElementById('f_tempat').value.trim();
+  const perkenalan = document.getElementById('f_perkenalan').value.trim();
+  const sapa = document.getElementById('f_sapa').value.trim();
+  const tanya = document.getElementById('f_tanya').value.trim();
+  const izin = document.getElementById('f_izin').value.trim();
+  const refleksi = document.getElementById('f_refleksi').value.trim();
+
+  if (!nama) { showToast('Isi nama dulu ya! 😊'); return; }
+  if (!tempat) { showToast('Isi tempat PKL dulu! 🏢'); return; }
+  if (perkenalan.length < 30) { showToast('Perkenalan masih terlalu singkat! ✍️'); return; }
+  if (sapa.length < 20) { showToast('Isi cara menyapa pembimbing dulu! 👋'); return; }
+  if (!radioState.rg1) { showToast('Pilih jawaban soal no. 5 ya!'); return; }
+  if (tanya.length < 20) { showToast('Isi cara bertanya dulu! ❓'); return; }
+  if (!radioState.rg2) { showToast('Pilih jawaban soal no. 7 ya!'); return; }
+  if (izin.length < 20) { showToast('Isi cara meminta izin dulu! 🚪'); return; }
+  if (!radioState.rg3) { showToast('Pilih jawaban soal no. 9 ya!'); return; }
+  if (refleksi.length < 50) { showToast('Refleksi masih terlalu singkat! ⭐'); return; }
+
+  const data = { nama, tempat, perkenalan, sapa, tanya, izin, refleksi,
+    pg1: radioState.rg1, pg2: radioState.rg2, pg3: radioState.rg3 };
+
+  goTo('screen-thinking');
+  runThinkingAnimation(data);
+}
+
+// ===== THINKING ANIMATION =====
+function runThinkingAnimation(data) {
+  const steps = ['step1','step2','step3','step4','step5'];
+  let i = 0;
+
+  function nextStep() {
+    if (i > 0) {
+      const prev = steps[i - 1];
+      document.getElementById(prev + 'icon').textContent = '✓';
+      document.getElementById(prev + 'icon').classList.remove('pending');
+    }
+    if (i < steps.length) {
+      document.getElementById(steps[i]).classList.add('visible');
+      i++;
+      setTimeout(nextStep, 900);
+    } else {
+      setTimeout(() => evaluateWithAI(data), 400);
+    }
+  }
+
+  steps.forEach(s => {
+    document.getElementById(s).classList.remove('visible');
+    document.getElementById(s + 'icon').textContent = '⟳';
+    document.getElementById(s + 'icon').classList.add('pending');
+  });
+
+  setTimeout(nextStep, 300);
+}
+
+// ===== AI EVALUATION =====
+async function evaluateWithAI(data) {
+  const prompt = `Kamu adalah sistem pakar evaluasi kesiapan PKL (Praktik Kerja Lapangan) siswa SMK jurusan TKJ.
+
+Evaluasi jawaban berikut dari siswa bernama ${data.nama} yang akan PKL di ${data.tempat}:
+
+SOAL ESSAY:
+1. Perkenalan diri: "${data.perkenalan}"
+2. Cara menyapa pembimbing: "${data.sapa}"  
+3. Cara bertanya jika tidak mengerti: "${data.tanya}"
+4. Cara meminta izin mendesak: "${data.izin}"
+5. Refleksi pentingnya etika komunikasi: "${data.refleksi}"
+
+PILIHAN GANDA:
+- Soal menyapa pembimbing: jawab "${data.pg1}" (benar: b)
+- Soal bertanya profesional: jawab "${data.pg2}" (benar: b)
+- Soal meminta izin: jawab "${data.pg3}" (benar: b)
+
+Berikan evaluasi dalam format JSON SAJA (tanpa markdown, tanpa backtick, tanpa penjelasan lain):
+{
+  "verdict": "SIAP_PKL" atau "BELUM_SIAP",
+  "skor_total": angka 0-100,
+  "skor_perkenalan": angka 0-25,
+  "skor_komunikasi": angka 0-25,
+  "skor_bertanya": angka 0-20,
+  "skor_izin": angka 0-20,
+  "skor_refleksi": angka 0-10,
+  "fb_perkenalan": "feedback spesifik 1-2 kalimat tentang kualitas perkenalan diri",
+  "fb_sapa": "feedback spesifik tentang cara menyapa",
+  "fb_bertanya": "feedback spesifik tentang cara bertanya",
+  "fb_izin": "feedback spesifik tentang cara meminta izin",
+  "fb_refleksi": "feedback spesifik tentang kedalaman refleksi",
+  "fb_pg": "feedback tentang pilihan ganda: mana yang benar/salah dan kenapa",
+  "insight": "analisis pola komunikasi siswa ini secara keseluruhan dalam 3-4 kalimat, personal dan spesifik berdasarkan jawaban aslinya",
+  "tips": ["tip 1 yang spesifik dan actionable untuk siswa ini", "tip 2", "tip 3"],
+  "pesan_penyemangat": "pesan penyemangat personal 1 kalimat untuk siswa ini sebelum PKL"
+}`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const json = await resp.json();
+    let text = json.content?.map(c => c.text || '').join('') || '';
+    text = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(text);
+    renderResult(data.nama, result);
+
+  } catch (e) {
+    // Fallback jika API gagal - gunakan sistem pakar lokal
+    const result = localExpertSystem(data);
+    renderResult(data.nama, result);
+  }
+}
+
+// ===== LOCAL FALLBACK =====
+function localExpertSystem(data) {
+  const pg1ok = data.pg1 === 'b', pg2ok = data.pg2 === 'b', pg3ok = data.pg3 === 'b';
+  let skor_pg = (pg1ok ? 8 : 0) + (pg2ok ? 7 : 0) + (pg3ok ? 7 : 0);
+
+  const sp = Math.min(25, Math.floor(data.perkenalan.length / 8) + (data.perkenalan.toLowerCase().includes('sekolah') ? 5 : 0) + (data.perkenalan.toLowerCase().includes('jurusan') || data.perkenalan.toLowerCase().includes('tkj') ? 5 : 0));
+  const sk = Math.min(17, Math.floor(data.sapa.length / 8)) + (pg1ok ? 8 : 0);
+  const sb = Math.min(13, Math.floor(data.tanya.length / 8)) + (pg2ok ? 7 : 0);
+  const si = Math.min(13, Math.floor(data.izin.length / 8)) + (pg3ok ? 7 : 0);
+  const sr = Math.min(10, Math.floor(data.refleksi.length / 15));
+
+  const total = Math.min(100, sp + sk + sb + si + sr);
+  const verdict = total >= 65 ? 'SIAP_PKL' : 'BELUM_SIAP';
+
+  return {
+    verdict,
+    skor_total: total,
+    skor_perkenalan: sp,
+    skor_komunikasi: sk,
+    skor_bertanya: sb,
+    skor_izin: si,
+    skor_refleksi: sr,
+    fb_perkenalan: data.perkenalan.length > 80 ? 'Perkenalan dirimu cukup lengkap! Sudah ada unsur nama dan tujuan PKL.' : 'Perkenalan masih terlalu singkat. Coba tambahkan asal sekolah, jurusan TKJ, dan harapanmu selama PKL.',
+    fb_sapa: pg1ok ? 'Pilihan menyapa sangat tepat! Kalimat lengkap, menyebut nama, dan menawarkan bantuan — itu profesional sekali.' : 'Ingat, saat menyapa pembimbing: sebut nama mereka, sapa dengan lengkap, dan tawarkan bantuan sebagai tanda inisiatif.',
+    fb_bertanya: pg2ok ? 'Cara bertanya yang kamu pilih sudah benar. Awali dengan "permisi", jelaskan konteks, lalu tanya dengan spesifik.' : 'Saat bertanya, jangan langsung ke inti. Awali dengan permisi, jelaskan apa yang sudah kamu coba, baru tanya.',
+    fb_izin: pg3ok ? 'Kalimat izin yang tepat! Ada mohon maaf, alasan singkat, dan komitmen untuk menyelesaikan pekerjaan.' : 'Saat minta izin: wajib mohon maaf dulu, sebutkan alasan singkat, dan pastikan ada komitmen penyelesaian kerja.',
+    fb_refleksi: data.refleksi.length > 100 ? 'Refleksimu cukup mendalam, menunjukkan kesadaran yang baik tentang pentingnya komunikasi di dunia kerja.' : 'Refleksi masih perlu lebih mendalam. Coba hubungkan dengan pengalamanmu dan apa yang akan benar-benar kamu lakukan.',
+    fb_pg: `Pilihan ganda: Soal 5 ${pg1ok ? '✓' : '✗'}, Soal 7 ${pg2ok ? '✓' : '✗'}, Soal 9 ${pg3ok ? '✓' : '✗'}. Ingat: komunikasi profesional selalu dimulai dengan salam yang lengkap dan sopan.`,
+    insight: `Berdasarkan jawaban-jawabanmu, kamu ${total >= 65 ? 'sudah menunjukkan pemahaman yang cukup baik tentang etika komunikasi profesional' : 'masih perlu mengembangkan kemampuan komunikasi formal'}. ${data.perkenalan.length > 80 ? 'Perkenalan dirimu sudah lumayan detail' : 'Perkenalan dirimu masih perlu diperkaya'}. Yang paling penting untuk PKL adalah selalu mengawali komunikasi dengan sopan dan penuh rasa hormat kepada pembimbing.`,
+    tips: [
+      'Latih perkenalan diri di depan cermin setiap hari sebelum PKL dimulai',
+      'Buat catatan kecil berisi nama-nama pembimbing dan jabatannya agar tidak salah menyapa',
+      'Setiap kali mau bertanya, pastikan sudah coba sendiri dulu dan siapkan pertanyaan yang spesifik'
+    ],
+    pesan_penyemangat: `Semangat ya ${data.nama}! PKL adalah petualangan baru yang akan membuatmu tumbuh. Kamu pasti bisa! 💪`
+  };
+}
+
+// ===== RENDER RESULT =====
+function renderResult(nama, r) {
+  const siap = r.verdict === 'SIAP_PKL';
+
+  document.getElementById('verdictIcon').className = 'verdict-icon-wrap ' + (siap ? 'siap' : 'belum');
+  document.getElementById('verdictIcon').innerHTML = `<img src="${siap ? 'images/siap_pkl.png' : 'images/belumsiap_pkl.png'}" alt="${siap ? 'Siap PKL' : 'Belum Siap'}" style="width:100%;height:100%;object-fit:contain;border-radius:inherit" onerror="this.parentElement.textContent='${siap ? '🎉' : '💪'}'">`;
+
+  document.getElementById('verdictLabel').className = 'verdict-label ' + (siap ? 'siap' : 'belum');
+  document.getElementById('verdictLabel').textContent = siap ? '✅ SIAP PKL!' : '⚠️ BELUM SIAP PKL';
+  document.getElementById('verdictTitle').textContent = siap ? `${nama} Siap Terjun!` : `${nama} Perlu Persiapan Lebih`;
+  document.getElementById('verdictMsg').textContent = siap
+    ? `Selamat! Berdasarkan analisis AI, kamu sudah memiliki etika dan kemampuan komunikasi yang cukup untuk PKL. ${r.pesan_penyemangat || ''}`
+    : `Jangan berkecil hati! Ini kesempatan untuk belajar lebih banyak sebelum PKL dimulai. ${r.pesan_penyemangat || ''}`;
+
+  document.getElementById('scorePills').innerHTML = `
+    <div class="score-pill" style="background:${siap ? '#B5EAD7' : '#FFB3C6'};color:${siap ? '#085041' : '#C0305A'}">Skor ${r.skor_total}/100</div>
+    <div class="score-pill" style="background:#FFF1A8;color:#8B6914">Essay ${r.skor_perkenalan + r.skor_komunikasi + r.skor_bertanya + r.skor_izin + r.skor_refleksi}/78</div>
+  `;
+
+  const fbs = [
+    { label: 'Soal 3 — Perkenalan diri', skor: r.skor_perkenalan, max: 25, text: r.fb_perkenalan },
+    { label: 'Soal 4–5 — Menyapa pembimbing', skor: r.skor_komunikasi, max: 25, text: r.fb_sapa },
+    { label: 'Soal 6–7 — Bertanya tugas', skor: r.skor_bertanya, max: 20, text: r.fb_bertanya },
+    { label: 'Soal 8–9 — Meminta izin', skor: r.skor_izin, max: 20, text: r.fb_izin },
+    { label: 'Soal 10 — Refleksi diri', skor: r.skor_refleksi, max: 10, text: r.fb_refleksi },
+    { label: 'Pilihan ganda keseluruhan', skor: null, max: null, text: r.fb_pg },
+  ];
+
+  document.getElementById('feedbackCards').innerHTML = fbs.map(fb => {
+    const pct = fb.skor !== null ? fb.skor / fb.max : null;
+    const cls = pct === null ? 'partial' : pct >= 0.7 ? 'correct' : pct >= 0.4 ? 'partial' : 'wrong';
+    const icon = cls === 'correct' ? '✅' : cls === 'partial' ? '⚠️' : '❌';
+    const skorTxt = fb.skor !== null ? `${fb.skor}/${fb.max}` : '';
+    return `<div class="feedback-card ${cls}">
+      <div class="fb-top"><span class="fb-icon">${icon}</span><span class="fb-label">${fb.label}</span><span class="fb-score">${skorTxt}</span></div>
+      <div class="fb-detail">${fb.text}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('aiInsightText').textContent = r.insight || '–';
+
+  document.getElementById('tipCards').innerHTML = (r.tips || []).map((t, i) =>
+    `<div class="tips-card"><div class="tip-num">${i + 1}</div><div class="tip-text">${t}</div></div>`
+  ).join('');
+
+  goTo('screen-result');
+  kirimKeSheets(data, r);
+}
+
+// ===== KIRIM KE GOOGLE SHEETS =====
+async function kirimKeSheets(data, r) {
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwGuR9MdkhU33qXzcELlFxYrxR7RRm3sViGYugwhbjmTjhvkXyrrM3AQHuIg8zoZxm2VQ/exec';
+  const payload = {
+    timestamp: new Date().toLocaleString('id-ID'),
+    nama: data.nama,
+    tempat: data.tempat,
+    score: r.skor_total,
+    verdict: r.verdict,
+    perkenalan: data.perkenalan,
+    sapa: data.sapa,
+    pg1_jawaban: data.pg1 === 'b' ? 'Benar' : 'Salah (pilih ' + data.pg1 + ')',
+    tanya: data.tanya,
+    pg2_jawaban: data.pg2 === 'b' ? 'Benar' : 'Salah (pilih ' + data.pg2 + ')',
+    izin: data.izin,
+    pg3_jawaban: data.pg3 === 'b' ? 'Benar' : 'Salah (pilih ' + data.pg3 + ')',
+    refleksi: data.refleksi
+  };
+  try {
+    await fetch(SHEETS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    showToast('✅ Data terkirim ke rekap guru!');
+  } catch(e) {
+    showToast('⚠️ Gagal kirim ke rekap, cek koneksi!');
+  }
+}
+
+// ===== UTILS =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showModal(title, body) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+function showScreenshotGuide() {
+  showModal('📸 Cara Screenshot Hasil', `
+    <strong>Android</strong><br>Tekan tombol Power + Volume Bawah bersamaan<br><br>
+    <strong>iPhone</strong><br>Tekan tombol Samping + Volume Atas bersamaan<br><br>
+    <strong>Laptop Windows</strong><br>Tekan Win + Shift + S, lalu pilih area<br><br>
+    <strong>Laptop Mac</strong><br>Tekan Cmd + Shift + 4, lalu pilih area<br><br>
+    💡 <em>Tips: scroll ke atas dulu untuk screenshot halaman hasil dari awal!</em>
+  `);
+}
+
+function resetAll() {
+  // Reset form
+  document.querySelectorAll('.form-input').forEach(el => el.value = '');
+  document.querySelectorAll('.radio-opt').forEach(el => el.classList.remove('selected'));
+  radioState.rg1 = null; radioState.rg2 = null; radioState.rg3 = null;
+  ['cc1','cc2','cc3','cc4','cc5'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '0 karakter'; });
+  updateProgress();
+  goTo('screen-title');
+}
+
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
