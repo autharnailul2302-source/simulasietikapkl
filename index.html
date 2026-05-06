@@ -770,6 +770,30 @@ textarea.form-input { min-height: 90px; resize: vertical; }
   box-shadow: 0 16px 40px rgba(255,107,53,0.4);
 }
 
+.student-info-bar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 6px 0 12px;
+}
+
+.student-chip {
+  background: rgba(26,159,216,0.12);
+  border: 1.5px solid rgba(26,159,216,0.3);
+  border-radius: 99px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1A9FD8;
+}
+
+.student-chip.name {
+  background: rgba(255,107,53,0.12);
+  border-color: rgba(255,107,53,0.3);
+  color: #FF6B35;
+}
+
 .verdict-label {
   font-size: 13px;
   font-weight: 800;
@@ -1151,8 +1175,11 @@ textarea.form-input { min-height: 90px; resize: vertical; }
       <div class="form-label"><span class="q-badge">1</span>Nama lengkap kamu</div>
       <input class="form-input" id="f_nama" type="text" placeholder="Tulis nama lengkap..." oninput="updateProgress()">
       <div style="height:14px"></div>
+      <div class="form-label"><span class="q-badge">1b</span>No. Absen</div>
+      <input class="form-input" id="f_absen" type="number" placeholder="Contoh: 12" oninput="updateProgress()">
+      <div style="height:14px"></div>
       <div class="form-label"><span class="q-badge">2</span>Tempat PKL yang kamu tuju</div>
-      <input class="form-input" id="f_tempat" type="text" placeholder="Contoh: CV Maju Jaya Informatika, Malang" oninput="updateProgress()">
+      <input class="form-input" id="f_tempat" type="text" placeholder="Contoh: CV Maju Jaya Informatika" oninput="updateProgress()">
     </div>
 
     <!-- PERKENALAN -->
@@ -1277,6 +1304,8 @@ textarea.form-input { min-height: 90px; resize: vertical; }
     <div class="verdict-icon-wrap" id="verdictIcon"></div>
     <div class="verdict-label" id="verdictLabel"></div>
     <div class="verdict-title" id="verdictTitle"></div>
+    <!-- Info siswa -->
+    <div class="student-info-bar" id="studentInfoBar"></div>
     <div class="verdict-msg" id="verdictMsg"></div>
     <div class="score-pills" id="scorePills"></div>
   </div>
@@ -1381,7 +1410,7 @@ function initForm() {
 }
 
 function updateProgress() {
-  const fields = ['f_nama', 'f_tempat', 'f_perkenalan', 'f_sapa', 'f_tanya', 'f_izin', 'f_refleksi'];
+  const fields = ['f_nama', 'f_absen', 'f_tempat', 'f_perkenalan', 'f_sapa', 'f_tanya', 'f_izin', 'f_refleksi'];
   let filled = fields.filter(id => document.getElementById(id)?.value.trim().length > 10).length;
   filled += Object.values(radioState).filter(v => v !== null).length;
   const total = fields.length + 3;
@@ -1396,6 +1425,7 @@ function updateProgress() {
 // ===== SUBMIT =====
 function submitForm() {
   const nama = document.getElementById('f_nama').value.trim();
+  const absen = document.getElementById('f_absen').value.trim();
   const tempat = document.getElementById('f_tempat').value.trim();
   const perkenalan = document.getElementById('f_perkenalan').value.trim();
   const sapa = document.getElementById('f_sapa').value.trim();
@@ -1414,7 +1444,7 @@ function submitForm() {
   if (!radioState.rg3) { showToast('Pilih jawaban soal no. 9 ya!'); return; }
   if (refleksi.length < 50) { showToast('Refleksi masih terlalu singkat! ⭐'); return; }
 
-  const data = { nama, tempat, perkenalan, sapa, tanya, izin, refleksi,
+  const data = { nama, absen, tempat, perkenalan, sapa, tanya, izin, refleksi,
     pg1: radioState.rg1, pg2: radioState.rg2, pg3: radioState.rg3 };
 
   goTo('screen-thinking');
@@ -1503,12 +1533,12 @@ Berikan evaluasi dalam format JSON SAJA (tanpa markdown, tanpa backtick, tanpa p
     let text = json.content?.map(c => c.text || '').join('') || '';
     text = text.replace(/```json|```/g, '').trim();
     const result = JSON.parse(text);
-    renderResult(data.nama, result);
+    renderResult(data, result);
 
   } catch (e) {
     // Fallback jika API gagal - gunakan sistem pakar lokal
     const result = localExpertSystem(data);
-    renderResult(data.nama, result);
+    renderResult(data, result);
   }
 }
 
@@ -1551,7 +1581,10 @@ function localExpertSystem(data) {
 }
 
 // ===== RENDER RESULT =====
-function renderResult(nama, r) {
+function renderResult(data, r) {
+  const nama = typeof data === 'string' ? data : data.nama;
+  const absen = typeof data === 'object' ? data.absen : '';
+  const tempat = typeof data === 'object' ? data.tempat : '';
   const siap = r.verdict === 'SIAP_PKL';
 
   document.getElementById('verdictIcon').className = 'verdict-icon-wrap ' + (siap ? 'siap' : 'belum');
@@ -1560,6 +1593,15 @@ function renderResult(nama, r) {
   document.getElementById('verdictLabel').className = 'verdict-label ' + (siap ? 'siap' : 'belum');
   document.getElementById('verdictLabel').textContent = siap ? '✅ SIAP PKL!' : '⚠️ BELUM SIAP PKL';
   document.getElementById('verdictTitle').textContent = siap ? `${nama} Siap Terjun!` : `${nama} Perlu Persiapan Lebih`;
+
+  // Info siswa
+  document.getElementById('studentInfoBar').innerHTML = `
+    <div class="student-chip name">👤 ${nama}</div>
+    ${absen ? `<div class="student-chip">No. Absen: ${absen}</div>` : ''}
+    <div class="student-chip">🏫 XI TKJ 2 · SMKN 1 Brondong</div>
+    ${tempat ? `<div class="student-chip">🏢 ${tempat}</div>` : ''}
+  `;
+
   document.getElementById('verdictMsg').textContent = siap
     ? `Selamat! Berdasarkan analisis AI, kamu sudah memiliki etika dan kemampuan komunikasi yang cukup untuk PKL. ${r.pesan_penyemangat || ''}`
     : `Jangan berkecil hati! Ini kesempatan untuk belajar lebih banyak sebelum PKL dimulai. ${r.pesan_penyemangat || ''}`;
