@@ -108,11 +108,43 @@ body {
   min-height: 18px;
 }
 
-/* ===================== TITLE PAGE ===================== */
+/* ===================== BALON ANIMASI ===================== */
+.balloons-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.balloon {
+  position: absolute;
+  font-size: 28px;
+  animation: balloonFloat linear infinite;
+  opacity: 0.85;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+}
+
+.b1 { left: 5%;  bottom: -60px; animation-duration: 6s;  animation-delay: 0s;   font-size: 32px; }
+.b2 { left: 20%; bottom: -60px; animation-duration: 8s;  animation-delay: 1.5s; font-size: 24px; }
+.b3 { left: 40%; bottom: -60px; animation-duration: 7s;  animation-delay: 0.8s; font-size: 30px; }
+.b4 { left: 60%; bottom: -60px; animation-duration: 9s;  animation-delay: 2.2s; font-size: 26px; }
+.b5 { left: 78%; bottom: -60px; animation-duration: 6.5s;animation-delay: 1s;   font-size: 22px; }
+.b6 { left: 90%; bottom: -60px; animation-duration: 8.5s;animation-delay: 3s;   font-size: 28px; }
+
+@keyframes balloonFloat {
+  0%   { transform: translateY(0)   rotate(-5deg); opacity: 0; }
+  5%   { opacity: 0.85; }
+  50%  { transform: translateY(-55vh) rotate(5deg); }
+  95%  { opacity: 0.85; }
+  100% { transform: translateY(-110vh) rotate(-3deg); opacity: 0; }
+}
+
+/* ===================== TITLE SCREEN ===================== */
 #screen-title {
   background: #5BC8E8;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   padding: 0;
   overflow: hidden;
   position: relative;
@@ -130,8 +162,12 @@ body {
   pointer-events: none;
 }
 
-#screen-title .title-hero,
-#screen-title .menu-card {
+#screen-title .title-hero {
+  flex: 1;
+}
+
+#screen-title .menu-card,
+#screen-title .balloons-wrap {
   position: relative;
   z-index: 1;
 }
@@ -225,21 +261,18 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 16px 16px 24px;
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 28px 28px 0 0;
-  border-top: 1.5px solid rgba(255,255,255,0.25);
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+  padding: 20px 20px 36px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 32px 32px 0 0;
+  border-top: 1.5px solid rgba(255,255,255,0.35);
+  box-shadow: 0 -4px 32px rgba(0,0,0,0.1);
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  margin: 0 auto;
-  width: 100%;
-  max-width: 480px;
-  z-index: 2;
+  z-index: 3;
 }
 
 .btn-mulai {
@@ -996,17 +1029,19 @@ textarea.form-input { min-height: 90px; resize: vertical; }
 
 <!-- ===== TITLE ===== -->
 <div class="screen" id="screen-title">
-  <img class="title-bg" src="images/titlescreen.png" alt="" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(160deg,#FFE8F0,#E8F4FF 60%,#E8FFF4)'">
-  <div class="title-hero">
-    <div class="title-badge">✨ XI TKJ 2 · Siap PKL!</div>
-    <div class="confetti-top">
-      <div class="confetti-dot"></div><div class="confetti-dot"></div>
-      <div class="confetti-dot"></div><div class="confetti-dot"></div>
-      <div class="confetti-dot"></div>
-    </div>
-    <div class="app-name">Simulasi Etika &<br>Komunikasi Profesional</div>
-    <div class="app-sub">Uji kesiapanmu sebelum PKL!<br>Sistem AI akan menilai jawabanmu secara cerdas.</div>
+  <img class="title-bg" src="images/titlescreen.png" alt="" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(160deg,#74C7EC,#1A9FD8)'">
+
+  <!-- Animasi balon mengambang -->
+  <div class="balloons-wrap">
+    <div class="balloon b1">🎈</div>
+    <div class="balloon b2">🎈</div>
+    <div class="balloon b3">🎉</div>
+    <div class="balloon b4">🎈</div>
+    <div class="balloon b5">⭐</div>
+    <div class="balloon b6">🎊</div>
   </div>
+
+  <div class="title-hero"></div>
   <div class="menu-card">
     <button class="btn-mulai" onclick="goTo('screen-form');initForm()">
       🚀 Mulai Simulasi
