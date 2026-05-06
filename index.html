@@ -113,7 +113,7 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
   overflow: hidden;
 }
 
@@ -121,23 +121,44 @@ body {
   position: absolute;
   font-size: 28px;
   animation: balloonFloat linear infinite;
-  opacity: 0.85;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+  opacity: 0.9;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
 }
 
-.b1 { left: 5%;  bottom: -60px; animation-duration: 6s;  animation-delay: 0s;   font-size: 32px; }
-.b2 { left: 20%; bottom: -60px; animation-duration: 8s;  animation-delay: 1.5s; font-size: 24px; }
-.b3 { left: 40%; bottom: -60px; animation-duration: 7s;  animation-delay: 0.8s; font-size: 30px; }
-.b4 { left: 60%; bottom: -60px; animation-duration: 9s;  animation-delay: 2.2s; font-size: 26px; }
-.b5 { left: 78%; bottom: -60px; animation-duration: 6.5s;animation-delay: 1s;   font-size: 22px; }
-.b6 { left: 90%; bottom: -60px; animation-duration: 8.5s;animation-delay: 3s;   font-size: 28px; }
+.b1 { left: 4%;  bottom: -70px; animation-duration: 5.5s; animation-delay: 0s;   font-size: 34px; }
+.b2 { left: 18%; bottom: -70px; animation-duration: 7.5s; animation-delay: 1.2s; font-size: 26px; }
+.b3 { left: 35%; bottom: -70px; animation-duration: 6.5s; animation-delay: 0.5s; font-size: 32px; }
+.b4 { left: 55%; bottom: -70px; animation-duration: 8.5s; animation-delay: 2s;   font-size: 28px; }
+.b5 { left: 72%; bottom: -70px; animation-duration: 6s;   animation-delay: 1.8s; font-size: 24px; }
+.b6 { left: 88%; bottom: -70px; animation-duration: 7s;   animation-delay: 3.5s; font-size: 30px; }
+.b7 { left: 28%; bottom: -70px; animation-duration: 9s;   animation-delay: 4s;   font-size: 22px; }
+.b8 { left: 65%; bottom: -70px; animation-duration: 5s;   animation-delay: 2.8s; font-size: 20px; }
 
 @keyframes balloonFloat {
-  0%   { transform: translateY(0)   rotate(-5deg); opacity: 0; }
-  5%   { opacity: 0.85; }
-  50%  { transform: translateY(-55vh) rotate(5deg); }
-  95%  { opacity: 0.85; }
-  100% { transform: translateY(-110vh) rotate(-3deg); opacity: 0; }
+  0%   { transform: translateY(0) rotate(-8deg) scale(0.8); opacity: 0; }
+  8%   { opacity: 0.9; transform: translateY(-5vh) rotate(4deg) scale(1); }
+  30%  { transform: translateY(-30vh) rotate(-6deg) scale(1.05); }
+  60%  { transform: translateY(-65vh) rotate(7deg) scale(0.98); }
+  90%  { opacity: 0.9; }
+  100% { transform: translateY(-115vh) rotate(-4deg) scale(0.9); opacity: 0; }
+}
+
+/* Animasi tombol naik turun */
+@keyframes btnBounce {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+.btn-mulai {
+  animation: btnBounce 2s ease-in-out infinite;
+}
+.btn-secondary {
+  animation: btnBounce 2s ease-in-out infinite;
+  animation-delay: 0.3s;
+}
+.btn-ghost {
+  animation: btnBounce 2s ease-in-out infinite;
+  animation-delay: 0.6s;
 }
 
 /* ===================== TITLE SCREEN ===================== */
@@ -164,12 +185,13 @@ body {
 
 #screen-title .title-hero {
   flex: 1;
+  position: relative;
+  z-index: 3;
 }
 
-#screen-title .menu-card,
-#screen-title .balloons-wrap {
+#screen-title .menu-card {
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }
 
 .title-hero {
@@ -296,7 +318,7 @@ body {
   text-shadow: 0 1px 0 rgba(255,255,255,0.3);
 }
 
-.btn-mulai:active { transform: translateY(3px); box-shadow: 0 3px 0 #c94f1a, 0 4px 12px rgba(255,107,53,0.3); }
+.btn-mulai:active { transform: translateY(3px); box-shadow: 0 3px 0 #c94f1a, 0 4px 12px rgba(255,107,53,0.3); animation: none; }
 
 .btn-secondary {
   width: 100%;
@@ -1063,6 +1085,8 @@ textarea.form-input { min-height: 90px; resize: vertical; }
     <div class="balloon b4">🎈</div>
     <div class="balloon b5">⭐</div>
     <div class="balloon b6">🎊</div>
+    <div class="balloon b7">🎈</div>
+    <div class="balloon b8">✨</div>
   </div>
 
   <div class="title-hero"></div>
@@ -1175,8 +1199,8 @@ textarea.form-input { min-height: 90px; resize: vertical; }
       <div class="form-label"><span class="q-badge">1</span>Nama lengkap kamu</div>
       <input class="form-input" id="f_nama" type="text" placeholder="Tulis nama lengkap..." oninput="updateProgress()">
       <div style="height:14px"></div>
-      <div class="form-label"><span class="q-badge">1b</span>No. Absen</div>
-      <input class="form-input" id="f_absen" type="number" placeholder="Contoh: 12" oninput="updateProgress()">
+      <div class="form-label"><span class="q-badge">1b</span>Kelas</div>
+      <input class="form-input" id="f_absen" type="text" placeholder="Contoh: XI TKJ 2" oninput="updateProgress()">
       <div style="height:14px"></div>
       <div class="form-label"><span class="q-badge">2</span>Tempat PKL yang kamu tuju</div>
       <input class="form-input" id="f_tempat" type="text" placeholder="Contoh: CV Maju Jaya Informatika" oninput="updateProgress()">
@@ -1597,7 +1621,7 @@ function renderResult(data, r) {
   // Info siswa
   document.getElementById('studentInfoBar').innerHTML = `
     <div class="student-chip name">👤 ${nama}</div>
-    ${absen ? `<div class="student-chip">No. Absen: ${absen}</div>` : ''}
+    ${absen ? `<div class="student-chip">🏷️ Kelas: ${absen}</div>` : ''}
     <div class="student-chip">🏫 XI TKJ 2 · SMKN 1 Brondong</div>
     ${tempat ? `<div class="student-chip">🏢 ${tempat}</div>` : ''}
   `;
