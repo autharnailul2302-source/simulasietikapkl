@@ -320,6 +320,61 @@ body {
 
 .btn-mulai:active { transform: translateY(3px); box-shadow: 0 3px 0 #c94f1a, 0 4px 12px rgba(255,107,53,0.3); animation: none; }
 
+.btn-leaderboard {
+  padding: 13px;
+  border: 2.5px solid rgba(255,215,0,0.8);
+  border-radius: var(--radius);
+  background: rgba(255,215,0,0.15);
+  color: #c8860a;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 4px 0 rgba(180,120,0,0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: btnBounce 2s ease-in-out infinite;
+  animation-delay: 0.9s;
+}
+.btn-leaderboard:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(180,120,0,0.3); animation: none; }
+
+/* ===== LEADERBOARD SCREEN ===== */
+#screen-leaderboard {
+  background: linear-gradient(160deg, #1A2E44 0%, #0f4c75 60%, #1B6CA8 100%);
+  overflow-y: auto;
+}
+.lb-header { padding: 48px 20px 16px; text-align: center; }
+.lb-crown { font-size: 56px; animation: float 2s ease-in-out infinite; display: block; margin-bottom: 8px; }
+.lb-title { font-size: 24px; font-weight: 900; color: #FFD700; text-shadow: 0 2px 12px rgba(255,215,0,0.4); }
+.lb-subtitle { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+.lb-stats { display: flex; gap: 10px; padding: 0 20px 16px; justify-content: center; flex-wrap: wrap; }
+.lb-stat-chip { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 99px; padding: 6px 16px; font-size: 12px; font-weight: 700; color: white; }
+.lb-stat-chip span { color: #FFD700; font-size: 15px; }
+.lb-list { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+.lb-empty { text-align: center; color: rgba(255,255,255,0.5); font-size: 14px; padding: 40px 20px; }
+.lb-card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; backdrop-filter: blur(8px); }
+.lb-rank { font-size: 20px; font-weight: 900; min-width: 36px; text-align: center; }
+.lb-rank.gold   { color: #FFD700; text-shadow: 0 0 12px rgba(255,215,0,0.6); }
+.lb-rank.silver { color: #C0C0C0; }
+.lb-rank.bronze { color: #CD7F32; }
+.lb-rank.normal { color: rgba(255,255,255,0.5); font-size: 14px; }
+.lb-info { flex: 1; }
+.lb-name { font-size: 15px; font-weight: 800; color: white; }
+.lb-meta { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+.lb-badge { padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.lb-badge.siap { background: linear-gradient(135deg, #A8E063, #3DAA5C); color: white; box-shadow: 0 2px 8px rgba(61,170,92,0.4); }
+.lb-badge.belum { background: linear-gradient(135deg, #FFD93D, #FF6B35); color: #1A2E44; box-shadow: 0 2px 8px rgba(255,107,53,0.4); }
+.lb-score { font-size: 20px; font-weight: 900; min-width: 44px; text-align: right; color: #FFD700; }
+.lb-actions { display: flex; gap: 10px; padding: 8px 16px 40px; background: transparent; }
+.lb-btn { flex: 1; padding: 13px; border-radius: var(--radius); font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; border: none; }
+.lb-btn.clear { background: rgba(255,80,80,0.2); border: 1.5px solid rgba(255,80,80,0.4); color: #ff8080; }
+.lb-btn.back { background: linear-gradient(135deg, #FFD93D, #FF6B35); color: #1A2E44; box-shadow: 0 4px 0 #c94f1a; }
+
 .btn-secondary {
   width: 100%;
   padding: 13px;
@@ -1094,9 +1149,14 @@ textarea.form-input { min-height: 90px; resize: vertical; }
     <button class="btn-mulai" onclick="goTo('screen-form');initForm()">
       🚀 Mulai Simulasi
     </button>
-    <button class="btn-secondary" onclick="goTo('screen-panduan')">
-      📖 Panduan Mengisi
-    </button>
+    <div style="display:flex;gap:10px">
+      <button class="btn-secondary" style="flex:1" onclick="goTo('screen-panduan')">
+        📖 Panduan
+      </button>
+      <button class="btn-leaderboard" style="flex:1" onclick="openLeaderboard()">
+        🏆 Papan Skor
+      </button>
+    </div>
     <button class="btn-ghost" onclick="goTo('screen-about')">
       💜 Tentang Aplikasi
     </button>
@@ -1176,6 +1236,27 @@ textarea.form-input { min-height: 90px; resize: vertical; }
       <h3>Catatan Privasi</h3>
       <p>Jawaban kamu dikirim ke AI hanya untuk dikoreksi dan tidak disimpan secara permanen. Gunakan dengan aman!</p>
     </div>
+  </div>
+</div>
+
+<!-- ===== LEADERBOARD ===== -->
+<div class="screen" id="screen-leaderboard">
+  <div class="page-header" style="background:transparent;border:none">
+    <button class="back-btn" style="background:rgba(255,255,255,0.15);color:white" onclick="goTo('screen-title')">←</button>
+    <div class="page-title" style="color:white">🏆 Papan Skor</div>
+  </div>
+  <div class="lb-header">
+    <span class="lb-crown">👑</span>
+    <div class="lb-title">Hall of Fame</div>
+    <div class="lb-subtitle">Siswa XI TKJ 2 · SMKN 1 Brondong</div>
+  </div>
+  <div class="lb-stats" id="lbStats"></div>
+  <div class="lb-list" id="lbList">
+    <div class="lb-empty">Belum ada data. Jadilah yang pertama! 🚀</div>
+  </div>
+  <div class="lb-actions">
+    <button class="lb-btn clear" onclick="clearLeaderboard()">🗑️ Reset Data</button>
+    <button class="lb-btn back" onclick="goTo('screen-title')">🏠 Kembali</button>
   </div>
 </div>
 
@@ -1392,6 +1473,92 @@ function startWithMusic() {
   animateLoading();
 }
 
+// ===== LEADERBOARD =====
+const LB_KEY = 'pkl_leaderboard_v1';
+
+function getLbData() {
+  try { return JSON.parse(localStorage.getItem(LB_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveLbEntry(data, r) {
+  const entries = getLbData();
+  const entry = {
+    id: Date.now(),
+    nama: data.nama,
+    kelas: data.absen || 'XI TKJ 2',
+    tempat: data.tempat,
+    verdict: r.verdict,
+    score: r.skor_total || r.total_skor || 0,
+    waktu: new Date().toLocaleDateString('id-ID', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })
+  };
+  // Cek duplikat nama (update jika sudah ada)
+  const idx = entries.findIndex(e => e.nama.toLowerCase() === entry.nama.toLowerCase());
+  if (idx >= 0) entries[idx] = entry;
+  else entries.push(entry);
+  // Sort: siap dulu, lalu score tertinggi
+  entries.sort((a, b) => {
+    if (a.verdict === b.verdict) return (b.score || 0) - (a.score || 0);
+    return a.verdict === 'SIAP_PKL' ? -1 : 1;
+  });
+  localStorage.setItem(LB_KEY, JSON.stringify(entries));
+}
+
+function openLeaderboard() {
+  renderLeaderboard();
+  goTo('screen-leaderboard');
+}
+
+function renderLeaderboard() {
+  const entries = getLbData();
+  const lbList = document.getElementById('lbList');
+  const lbStats = document.getElementById('lbStats');
+
+  // Stats
+  const total = entries.length;
+  const siapCount = entries.filter(e => e.verdict === 'SIAP_PKL').length;
+  lbStats.innerHTML = `
+    <div class="lb-stat-chip">Total: <span>${total}</span> siswa</div>
+    <div class="lb-stat-chip">✅ Siap: <span>${siapCount}</span></div>
+    <div class="lb-stat-chip">⚠️ Belum: <span>${total - siapCount}</span></div>
+  `;
+
+  if (entries.length === 0) {
+    lbList.innerHTML = '<div class="lb-empty">Belum ada data.<br>Jadilah yang pertama! 🚀</div>';
+    return;
+  }
+
+  const rankEmoji = ['🥇','🥈','🥉'];
+  const rankClass = ['gold','silver','bronze'];
+
+  lbList.innerHTML = entries.map((e, i) => {
+    const rank = i < 3 ? rankEmoji[i] : `#${i+1}`;
+    const rClass = i < 3 ? rankClass[i] : 'normal';
+    const siap = e.verdict === 'SIAP_PKL';
+    return `
+      <div class="lb-card">
+        <div class="lb-rank ${rClass}">${rank}</div>
+        <div class="lb-info">
+          <div class="lb-name">${e.nama}</div>
+          <div class="lb-meta">${e.kelas} · ${e.tempat || '-'} · ${e.waktu}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div class="lb-badge ${siap ? 'siap' : 'belum'}">${siap ? '✅ SIAP PKL' : '⚠️ Belum Siap'}</div>
+          ${e.score ? `<div class="lb-score">${e.score}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function clearLeaderboard() {
+  if (confirm('Reset semua data papan skor? Data tidak bisa dikembalikan.')) {
+    localStorage.removeItem(LB_KEY);
+    renderLeaderboard();
+    showToast('Data papan skor direset! 🗑️');
+  }
+}
+
 // ===== LOADING =====
 const loadMsgs = [
   'Mempersiapkan simulasi...',
@@ -1557,11 +1724,13 @@ Berikan evaluasi dalam format JSON SAJA (tanpa markdown, tanpa backtick, tanpa p
     let text = json.content?.map(c => c.text || '').join('') || '';
     text = text.replace(/```json|```/g, '').trim();
     const result = JSON.parse(text);
+    saveLbEntry(data, result);
     renderResult(data, result);
 
   } catch (e) {
     // Fallback jika API gagal - gunakan sistem pakar lokal
     const result = localExpertSystem(data);
+    saveLbEntry(data, result);
     renderResult(data, result);
   }
 }
