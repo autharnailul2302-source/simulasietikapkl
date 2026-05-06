@@ -2067,9 +2067,10 @@ function renderResult(data, r) {
   kirimKeSheets(data, r);
 }
 
-// ===== KIRIM KE GOOGLE SHEETS =====
-async function kirimKeSheets(data, r) {
-  const payload = {
+// ===== KIRIM KE GOOGLE SHEETS (JSONP GET — no CORS issue) =====
+function kirimKeSheets(data, r) {
+  const params = new URLSearchParams({
+    action: 'write',
     timestamp: new Date().toLocaleString('id-ID'),
     nama: data.nama,
     tempat: data.tempat,
@@ -2083,22 +2084,30 @@ async function kirimKeSheets(data, r) {
     izin: data.izin,
     pg3_jawaban: data.pg3 === 'b' ? 'Benar' : 'Salah (pilih ' + data.pg3 + ')',
     refleksi: data.refleksi
-  };
-  try {
-    const resp = await fetch(SHEETS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const result = await resp.json();
+  });
+
+  const cbName = 'writeCallback_' + Date.now();
+  const script = document.createElement('script');
+  script.src = SHEETS_URL + '?' + params.toString() + '&callback=' + cbName;
+
+  const timeout = setTimeout(() => {
+    showToast('⚠️ Gagal kirim ke rekap, cek koneksi!');
+    delete window[cbName];
+    script.remove();
+  }, 8000);
+
+  window[cbName] = function(result) {
+    clearTimeout(timeout);
+    delete window[cbName];
+    script.remove();
     if (result.status === 'ok') {
       showToast('✅ Data terkirim ke rekap guru!');
     } else {
       showToast('⚠️ Gagal kirim: ' + (result.msg || 'Coba lagi'));
     }
-  } catch(e) {
-    showToast('⚠️ Gagal kirim ke rekap, cek koneksi!');
-  }
+  };
+
+  document.body.appendChild(script);
 }
 
 // ===== UTILS =====
