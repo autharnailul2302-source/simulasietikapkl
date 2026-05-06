@@ -2085,13 +2085,17 @@ async function kirimKeSheets(data, r) {
     refleksi: data.refleksi
   };
   try {
-    await fetch(SHEETS_URL, {
+    const resp = await fetch(SHEETS_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    showToast('✅ Data terkirim ke rekap guru!');
+    const result = await resp.json();
+    if (result.status === 'ok') {
+      showToast('✅ Data terkirim ke rekap guru!');
+    } else {
+      showToast('⚠️ Gagal kirim: ' + (result.msg || 'Coba lagi'));
+    }
   } catch(e) {
     showToast('⚠️ Gagal kirim ke rekap, cek koneksi!');
   }
