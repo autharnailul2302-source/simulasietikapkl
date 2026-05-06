@@ -1474,89 +1474,71 @@ function startWithMusic() {
 }
 
 // ===== LEADERBOARD =====
-const LB_KEY = 'pkl_leaderboard_v1';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwGuR9MdkhU33qXzcELlFxYrxR7RRm3sViGYugwhbjmTjhvkXyrrM3AQHuIg8zoZxm2VQ/exec';
 
-function getLbData() {
-  try { return JSON.parse(localStorage.getItem(LB_KEY)) || []; }
-  catch { return []; }
-}
-
+// saveLbEntry tidak lagi menyimpan ke localStorage — data sudah masuk Sheets via kirimKeSheets()
 function saveLbEntry(data, r) {
-  const entries = getLbData();
-  const entry = {
-    id: Date.now(),
-    nama: data.nama,
-    kelas: data.absen || 'XI TKJ 2',
-    tempat: data.tempat,
-    verdict: r.verdict,
-    score: r.skor_total || r.total_skor || 0,
-    waktu: new Date().toLocaleDateString('id-ID', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })
-  };
-  // Cek duplikat nama (update jika sudah ada)
-  const idx = entries.findIndex(e => e.nama.toLowerCase() === entry.nama.toLowerCase());
-  if (idx >= 0) entries[idx] = entry;
-  else entries.push(entry);
-  // Sort: siap dulu, lalu score tertinggi
-  entries.sort((a, b) => {
-    if (a.verdict === b.verdict) return (b.score || 0) - (a.score || 0);
-    return a.verdict === 'SIAP_PKL' ? -1 : 1;
-  });
-  localStorage.setItem(LB_KEY, JSON.stringify(entries));
+  // Tidak perlu apa-apa di sini, data sudah dikirim ke Google Sheets
 }
 
 function openLeaderboard() {
-  renderLeaderboard();
   goTo('screen-leaderboard');
+  renderLeaderboard();
 }
 
-function renderLeaderboard() {
-  const entries = getLbData();
+async function renderLeaderboard() {
   const lbList = document.getElementById('lbList');
   const lbStats = document.getElementById('lbStats');
 
-  // Stats
-  const total = entries.length;
-  const siapCount = entries.filter(e => e.verdict === 'SIAP_PKL').length;
-  lbStats.innerHTML = `
-    <div class="lb-stat-chip">Total: <span>${total}</span> siswa</div>
-    <div class="lb-stat-chip">✅ Siap: <span>${siapCount}</span></div>
-    <div class="lb-stat-chip">⚠️ Belum: <span>${total - siapCount}</span></div>
-  `;
+  // Tampilkan loading dulu
+  lbList.innerHTML = '<div class="lb-empty">⏳ Memuat data...</div>';
+  lbStats.innerHTML = '';
 
-  if (entries.length === 0) {
-    lbList.innerHTML = '<div class="lb-empty">Belum ada data.<br>Jadilah yang pertama! 🚀</div>';
-    return;
-  }
+  try {
+    const resp = await fetch(SHEETS_URL, { method: 'GET' });
+    const json = await resp.json();
+    const entries = (json.data || []).filter(e => e.nama);
 
-  const rankEmoji = ['🥇','🥈','🥉'];
-  const rankClass = ['gold','silver','bronze'];
-
-  lbList.innerHTML = entries.map((e, i) => {
-    const rank = i < 3 ? rankEmoji[i] : `#${i+1}`;
-    const rClass = i < 3 ? rankClass[i] : 'normal';
-    const siap = e.verdict === 'SIAP_PKL';
-    return `
-      <div class="lb-card">
-        <div class="lb-rank ${rClass}">${rank}</div>
-        <div class="lb-info">
-          <div class="lb-name">${e.nama}</div>
-          <div class="lb-meta">${e.kelas} · ${e.tempat || '-'} · ${e.waktu}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <div class="lb-badge ${siap ? 'siap' : 'belum'}">${siap ? '✅ SIAP PKL' : '⚠️ Belum Siap'}</div>
-          ${e.score ? `<div class="lb-score">${e.score}</div>` : ''}
-        </div>
-      </div>
+    const total = entries.length;
+    lbStats.innerHTML = `
+      <div class="lb-stat-chip">Total: <span>${total}</span> siswa</div>
+      <div class="lb-stat-chip">🏆 Tertinggi: <span>${entries[0]?.score ?? '-'}</span></div>
     `;
-  }).join('');
+
+    if (entries.length === 0) {
+      lbList.innerHTML = '<div class="lb-empty">Belum ada data.<br>Jadilah yang pertama! 🚀</div>';
+      return;
+    }
+
+    const rankEmoji = ['🥇','🥈','🥉'];
+    const rankClass = ['gold','silver','bronze'];
+
+    lbList.innerHTML = entries.map((e, i) => {
+      const rank = i < 3 ? rankEmoji[i] : `#${i+1}`;
+      const rClass = i < 3 ? rankClass[i] : 'normal';
+      const siap = e.score >= 65;
+      return `
+        <div class="lb-card">
+          <div class="lb-rank ${rClass}">${rank}</div>
+          <div class="lb-info">
+            <div class="lb-name">${e.nama}</div>
+            <div class="lb-meta">${e.tempat || '-'} · ${e.waktu || ''}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            <div class="lb-badge ${siap ? 'siap' : 'belum'}">${siap ? '✅ SIAP PKL' : '⚠️ Belum Siap'}</div>
+            ${e.score ? `<div class="lb-score">${e.score}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  } catch(err) {
+    lbList.innerHTML = '<div class="lb-empty">❌ Gagal memuat data.<br>Cek koneksi internet kamu!</div>';
+  }
 }
 
 function clearLeaderboard() {
-  if (confirm('Reset semua data papan skor? Data tidak bisa dikembalikan.')) {
-    localStorage.removeItem(LB_KEY);
-    renderLeaderboard();
-    showToast('Data papan skor direset! 🗑️');
-  }
+  showToast('⚠️ Hapus data harus dilakukan langsung di Google Sheets.');
 }
 
 // ===== LOADING =====
@@ -1836,7 +1818,6 @@ function renderResult(data, r) {
 
 // ===== KIRIM KE GOOGLE SHEETS =====
 async function kirimKeSheets(data, r) {
-  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwGuR9MdkhU33qXzcELlFxYrxR7RRm3sViGYugwhbjmTjhvkXyrrM3AQHuIg8zoZxm2VQ/exec';
   const payload = {
     timestamp: new Date().toLocaleString('id-ID'),
     nama: data.nama,
