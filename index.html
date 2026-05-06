@@ -1254,6 +1254,11 @@ textarea.form-input { min-height: 90px; resize: vertical; }
   <div class="lb-list" id="lbList">
     <div class="lb-empty">Belum ada data. Jadilah yang pertama! 🚀</div>
   </div>
+  <div class="lb-pagination" id="lbPagination" style="display:none; justify-content:center; align-items:center; gap:12px; padding:8px 16px 4px;">
+    <button class="lb-page-btn" id="lbPrev" onclick="lbChangePage(-1)" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:white;font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 18px;border-radius:99px;cursor:pointer;">&#8592; Prev</button>
+    <span class="lb-page-info" id="lbPageInfo" style="color:rgba(255,255,255,0.8);font-size:13px;font-weight:800;min-width:80px;text-align:center;"></span>
+    <button class="lb-page-btn" id="lbNext" onclick="lbChangePage(1)" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);color:white;font-family:Nunito,sans-serif;font-size:13px;font-weight:800;padding:8px 18px;border-radius:99px;cursor:pointer;">Next &#8594;</button>
+  </div>
   <div class="lb-actions">
     <button class="lb-btn clear" onclick="cetakLeaderboard()">🖨️ Cetak PDF</button>
     <button class="lb-btn back" onclick="goTo('screen-title')">🏠 Kembali</button>
@@ -1486,14 +1491,20 @@ function openLeaderboard() {
   renderLeaderboard();
 }
 
+// ===== STATE PAGING =====
+let lbAllEntries = [];
+let lbCurrentPage = 0;
+const LB_PER_PAGE = 5;
+
 function renderLeaderboard() {
   const lbList = document.getElementById('lbList');
   const lbStats = document.getElementById('lbStats');
+  const lbPagination = document.getElementById('lbPagination');
 
   lbList.innerHTML = '<div class="lb-empty">⏳ Memuat data...</div>';
   lbStats.innerHTML = '';
+  lbPagination.style.display = 'none';
 
-  // Pakai JSONP untuk bypass CORS Google Apps Script
   const cbName = 'lbCallback_' + Date.now();
   const script = document.createElement('script');
   script.src = SHEETS_URL + '?callback=' + cbName;
@@ -1509,43 +1520,80 @@ function renderLeaderboard() {
     delete window[cbName];
     script.remove();
 
-    const entries = (json.data || []).filter(e => e.nama);
-    const total = entries.length;
+    lbAllEntries = (json.data || []).filter(e => e.nama);
+    const total = lbAllEntries.length;
+    const siapCount = lbAllEntries.filter(e => e.score >= 65).length;
 
     lbStats.innerHTML = `
       <div class="lb-stat-chip">Total: <span>${total}</span> siswa</div>
-      <div class="lb-stat-chip">🏆 Tertinggi: <span>${entries[0]?.score ?? '-'}</span></div>
+      <div class="lb-stat-chip">✅ Siap: <span>${siapCount}</span></div>
+      <div class="lb-stat-chip">🏆 Tertinggi: <span>${lbAllEntries[0]?.score ?? '-'}</span></div>
     `;
 
-    if (entries.length === 0) {
+    if (lbAllEntries.length === 0) {
       lbList.innerHTML = '<div class="lb-empty">Belum ada data.<br>Jadilah yang pertama! 🚀</div>';
       return;
     }
 
-    const rankEmoji = ['🥇','🥈','🥉'];
-    const rankClass = ['gold','silver','bronze'];
-
-    lbList.innerHTML = entries.map((e, i) => {
-      const rank = i < 3 ? rankEmoji[i] : `#${i+1}`;
-      const rClass = i < 3 ? rankClass[i] : 'normal';
-      const siap = e.score >= 65;
-      return `
-        <div class="lb-card">
-          <div class="lb-rank ${rClass}">${rank}</div>
-          <div class="lb-info">
-            <div class="lb-name">${e.nama}</div>
-            <div class="lb-meta">${e.tempat || '-'} · ${e.waktu || ''}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-            <div class="lb-badge ${siap ? 'siap' : 'belum'}">${siap ? '✅ SIAP PKL' : '⚠️ Belum Siap'}</div>
-            ${e.score ? `<div class="lb-score">${e.score}</div>` : ''}
-          </div>
-        </div>
-      `;
-    }).join('');
+    lbCurrentPage = 0;
+    renderLbPage();
   };
 
   document.body.appendChild(script);
+}
+
+function renderLbPage() {
+  const lbList = document.getElementById('lbList');
+  const lbPagination = document.getElementById('lbPagination');
+  const lbPageInfo = document.getElementById('lbPageInfo');
+  const lbPrev = document.getElementById('lbPrev');
+  const lbNext = document.getElementById('lbNext');
+
+  const totalPages = Math.ceil(lbAllEntries.length / LB_PER_PAGE);
+  const start = lbCurrentPage * LB_PER_PAGE;
+  const slice = lbAllEntries.slice(start, start + LB_PER_PAGE);
+
+  const rankEmoji = ['🥇','🥈','🥉'];
+  const rankClass = ['gold','silver','bronze'];
+
+  lbList.innerHTML = slice.map((e, i) => {
+    const globalIdx = start + i;
+    const rank = globalIdx < 3 ? rankEmoji[globalIdx] : `#${globalIdx+1}`;
+    const rClass = globalIdx < 3 ? rankClass[globalIdx] : 'normal';
+    const siap = e.score >= 65;
+    return `
+      <div class="lb-card">
+        <div class="lb-rank ${rClass}">${rank}</div>
+        <div class="lb-info">
+          <div class="lb-name">${e.nama}</div>
+          <div class="lb-meta">${e.tempat || '-'} · ${e.waktu || ''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div class="lb-badge ${siap ? 'siap' : 'belum'}">${siap ? '✅ SIAP PKL' : '⚠️ Belum Siap'}</div>
+          ${e.score ? `<div class="lb-score">${e.score}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Tampilkan pagination kalau lebih dari 1 halaman
+  if (totalPages > 1) {
+    lbPagination.style.display = 'flex';
+    lbPageInfo.textContent = `${lbCurrentPage + 1} / ${totalPages}`;
+    lbPrev.style.opacity = lbCurrentPage === 0 ? '0.3' : '1';
+    lbPrev.disabled = lbCurrentPage === 0;
+    lbNext.style.opacity = lbCurrentPage >= totalPages - 1 ? '0.3' : '1';
+    lbNext.disabled = lbCurrentPage >= totalPages - 1;
+  } else {
+    lbPagination.style.display = 'none';
+  }
+}
+
+function lbChangePage(dir) {
+  const totalPages = Math.ceil(lbAllEntries.length / LB_PER_PAGE);
+  lbCurrentPage = Math.max(0, Math.min(totalPages - 1, lbCurrentPage + dir));
+  renderLbPage();
+  document.getElementById('lbList').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function cetakLeaderboard() {
