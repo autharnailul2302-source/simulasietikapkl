@@ -1255,7 +1255,7 @@ textarea.form-input { min-height: 90px; resize: vertical; }
     <div class="lb-empty">Belum ada data. Jadilah yang pertama! 🚀</div>
   </div>
   <div class="lb-actions">
-    <button class="lb-btn clear" onclick="clearLeaderboard()">🗑️ Reset Data</button>
+    <button class="lb-btn clear" onclick="cetakLeaderboard()">🖨️ Cetak PDF</button>
     <button class="lb-btn back" onclick="goTo('screen-title')">🏠 Kembali</button>
   </div>
 </div>
@@ -1486,20 +1486,32 @@ function openLeaderboard() {
   renderLeaderboard();
 }
 
-async function renderLeaderboard() {
+function renderLeaderboard() {
   const lbList = document.getElementById('lbList');
   const lbStats = document.getElementById('lbStats');
 
-  // Tampilkan loading dulu
   lbList.innerHTML = '<div class="lb-empty">⏳ Memuat data...</div>';
   lbStats.innerHTML = '';
 
-  try {
-    const resp = await fetch(SHEETS_URL, { method: 'GET' });
-    const json = await resp.json();
-    const entries = (json.data || []).filter(e => e.nama);
+  // Pakai JSONP untuk bypass CORS Google Apps Script
+  const cbName = 'lbCallback_' + Date.now();
+  const script = document.createElement('script');
+  script.src = SHEETS_URL + '?callback=' + cbName;
 
+  const timeout = setTimeout(() => {
+    lbList.innerHTML = '<div class="lb-empty">❌ Gagal memuat data.<br>Pastikan Apps Script sudah di-deploy ulang!</div>';
+    delete window[cbName];
+    script.remove();
+  }, 8000);
+
+  window[cbName] = function(json) {
+    clearTimeout(timeout);
+    delete window[cbName];
+    script.remove();
+
+    const entries = (json.data || []).filter(e => e.nama);
     const total = entries.length;
+
     lbStats.innerHTML = `
       <div class="lb-stat-chip">Total: <span>${total}</span> siswa</div>
       <div class="lb-stat-chip">🏆 Tertinggi: <span>${entries[0]?.score ?? '-'}</span></div>
@@ -1531,10 +1543,201 @@ async function renderLeaderboard() {
         </div>
       `;
     }).join('');
+  };
 
-  } catch(err) {
-    lbList.innerHTML = '<div class="lb-empty">❌ Gagal memuat data.<br>Cek koneksi internet kamu!</div>';
+  document.body.appendChild(script);
+}
+
+function cetakLeaderboard() {
+  const lbList = document.getElementById('lbList');
+  const cards = lbList.querySelectorAll('.lb-card');
+  if (cards.length === 0) { showToast('Belum ada data untuk dicetak!'); return; }
+
+  const rankEmoji = ['🥇','🥈','🥉'];
+  const PER_PAGE = 5;
+
+  // Kumpulkan data dari card yang sudah dirender
+  const rows = Array.from(cards).map((card, i) => {
+    const nama = card.querySelector('.lb-name')?.textContent || '-';
+    const meta = card.querySelector('.lb-meta')?.textContent || '-';
+    const score = card.querySelector('.lb-score')?.textContent || '-';
+    const siap = card.querySelector('.lb-badge.siap') !== null;
+    const rank = i < 3 ? rankEmoji[i] : `#${i+1}`;
+    return { rank, nama, meta, score, siap };
+  });
+
+  const totalPages = Math.ceil(rows.length / PER_PAGE);
+  const now = new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  let pagesHtml = '';
+  for (let p = 0; p < totalPages; p++) {
+    const slice = rows.slice(p * PER_PAGE, (p + 1) * PER_PAGE);
+    const rowsHtml = slice.map(r => `
+      <tr>
+        <td class="rank">${r.rank}</td>
+        <td class="nama">${r.nama}</td>
+        <td class="meta">${r.meta}</td>
+        <td class="score">${r.score}</td>
+        <td class="status ${r.siap ? 'siap' : 'belum'}">${r.siap ? '✅ SIAP PKL' : '⚠️ Belum Siap'}</td>
+      </tr>`).join('');
+
+    pagesHtml += `
+      <div class="page">
+        <div class="header">
+          <div class="header-left">
+            <div class="crown">👑</div>
+            <div>
+              <div class="title">Hall of Fame · Papan Skor PKL</div>
+              <div class="subtitle">Siswa XI TKJ 2 · SMKN 1 Brondong · Dicetak: ${now}</div>
+            </div>
+          </div>
+          <div class="page-num">Halaman ${p+1} / ${totalPages}</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:60px">Rank</th>
+              <th>Nama Siswa</th>
+              <th>Tempat PKL · Waktu</th>
+              <th style="width:70px">Skor</th>
+              <th style="width:110px">Status</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div class="footer">
+          Simulasi Etika &amp; Komunikasi Profesional · XI TKJ 2 · SMKN 1 Brondong
+          ${p === totalPages - 1 ? `<br><strong>Total ${rows.length} siswa · ${rows.filter(r=>r.siap).length} Siap PKL · ${rows.filter(r=>!r.siap).length} Belum Siap</strong>` : ''}
+        </div>
+      </div>
+    `;
   }
+
+  const printWin = window.open('', '_blank');
+  printWin.document.write(`<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Papan Skor PKL - XI TKJ 2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: #f0f4ff; color: #1A2E44; }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto 20px;
+    background: white;
+    padding: 20mm 18mm 16mm;
+    display: flex;
+    flex-direction: column;
+    page-break-after: always;
+    position: relative;
+  }
+  .page:last-child { page-break-after: avoid; margin-bottom: 0; }
+
+  /* Dekorasi sudut */
+  .page::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 8px;
+    background: linear-gradient(90deg, #1A9FD8, #FFD93D, #FF6B35, #3DAA5C);
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #e8f4ff;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .crown { font-size: 40px; line-height: 1; }
+  .title { font-size: 18px; font-weight: 900; color: #1A2E44; }
+  .subtitle { font-size: 11px; color: #4A7A9B; margin-top: 2px; }
+  .page-num {
+    background: linear-gradient(135deg, #1A9FD8, #0f6fa3);
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 99px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    flex: 1;
+    font-size: 13px;
+  }
+  thead tr {
+    background: linear-gradient(135deg, #1A2E44, #0f4c75);
+    color: white;
+  }
+  thead th {
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  tbody tr:nth-child(even) { background: #f7fbff; }
+  tbody tr:nth-child(odd)  { background: white; }
+  tbody tr:hover { background: #eaf6ff; }
+  td {
+    padding: 13px 10px;
+    border-bottom: 1px solid #e8f0f8;
+    vertical-align: middle;
+  }
+  td.rank { font-size: 18px; text-align: center; font-weight: 900; }
+  td.nama { font-weight: 800; font-size: 14px; color: #1A2E44; }
+  td.meta { font-size: 11px; color: #4A7A9B; }
+  td.score { font-size: 20px; font-weight: 900; color: #1A9FD8; text-align: center; }
+  td.status { text-align: center; font-size: 11px; font-weight: 800; }
+  td.status.siap {
+    color: #2d8a4e;
+    background: #e8f9ee;
+    border-radius: 8px;
+  }
+  td.status.belum {
+    color: #b05a10;
+    background: #fff3e0;
+    border-radius: 8px;
+  }
+
+  .footer {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid #e8f0f8;
+    font-size: 10px;
+    color: #4A7A9B;
+    text-align: center;
+    line-height: 1.8;
+  }
+
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+${pagesHtml}
+<div style="text-align:center;padding:20px;color:#999;font-size:12px;font-family:Nunito">
+  Klik <strong>Ctrl+P</strong> (Windows) atau <strong>Cmd+P</strong> (Mac) untuk cetak / save PDF
+</div>
+<script>
+  // Auto print setelah font loaded
+  document.fonts.ready.then(() => {
+    setTimeout(() => window.print(), 800);
+  });
+<\/script>
+</body>
+</html>`);
+  printWin.document.close();
 }
 
 function clearLeaderboard() {
